@@ -72,7 +72,7 @@ export function mount(root, opts) {
     <div class="thumbs" role="tablist" aria-label="Maps in this group" id="thumbs"></div></div>
   </section>
   <section id="storms" class="wrap"><h2>Storms</h2><div class="storms">${stormCards}</div>
-    <div class="alerts"><h3>US tropical warnings and watches</h3><p class="fine" id="alert-note">${opts.liveAlerts ? 'Live from the National Weather Service, checked each time you open or refresh this page.' : 'Live warnings run only on the deployed site, not in this preview. For current warnings see weather.gov.'}</p><ul id="alerts"><li>${opts.liveAlerts ? 'Loading…' : 'Not shown in this preview.'}</li></ul><p class="fine">Official warnings come from the National Weather Service. Everything under Model guidance is research or enthusiast material, not an official forecast.</p></div></section>
+    <div class="alerts"><h3>US tropical warnings and watches</h3><p class="fine" id="alert-note">${opts.liveAlerts ? 'Live from the National Weather Service, checked each time you open or refresh this page. This covers US areas only. Warnings issued by other countries, such as Mexico, are not shown: see the official advisory for each storm.' : 'Live warnings run only on the deployed site, not in this preview. For current warnings see weather.gov.'}</p><ul id="alerts"><li>${opts.liveAlerts ? 'Loading…' : 'Not shown in this preview.'}</li></ul><p class="fine">Official warnings come from the National Weather Service. Everything under Model guidance is research or enthusiast material, not an official forecast.</p></div></section>
   <section class="wrap"><h2>Coast and sea</h2>${links(COAST)}</section>
   <section id="models" class="wrap"><h2>Model guidance</h2><p class="fine">Models disagree with each other and with reality. These links open each source's own site. Not official forecasts.</p>${links(MODELS)}</section>
   <section id="sources" class="wrap"><h2>Sources, reuse and limits</h2>${opts.credits}</section>
@@ -98,7 +98,7 @@ export function mount(root, opts) {
     fetch(ALERT_URL).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(j => {
       if (!j || !Array.isArray(j.features)) throw new Error('unexpected response');
       const f = j.features.filter(a => a.properties && REL.test(a.properties.event) && (!a.properties.expires || new Date(a.properties.expires) > new Date()));
-      $('#alert-n').textContent = f.length; $('#alert-d').textContent = f.length ? 'See Storms section' : 'None in effect as of ' + fmt(new Date().toISOString(), tz);
+      $('#alert-n').textContent = f.length; $('#alert-d').textContent = f.length ? 'See Storms section' : 'None for US areas as of ' + fmt(new Date().toISOString(), tz);
       $('#alerts').innerHTML = f.length ? f.slice(0, 25).map(a => `<li class="${/Warning/.test(a.properties.event) ? 'warn' : 'watch'}"><strong>${esc(a.properties.event)}</strong> ${esc(a.properties.areaDesc).slice(0, 160)} <span class="muted">until ${fmt(a.properties.expires, tz)}</span></li>`).join('') : '<li>None in effect for US areas.</li>';
       if (f.length) $('#alert-n').classList.add('hot');
     }).catch(() => { $('#alert-n').textContent = '?'; $('#alert-d').innerHTML = 'Could not load. Check <a href="https://www.weather.gov/" ' + ext + '>weather.gov</a>'; $('#alerts').innerHTML = '<li>Could not load. Check <a href="https://www.weather.gov/" ' + ext + '>weather.gov</a>.</li>'; });
